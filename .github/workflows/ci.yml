@@ -1,0 +1,93 @@
+name: CI
+
+# Covers the two things local development cannot: the packages install cleanly on
+# the minimum supported Python, and the Docker image actually serves traffic.
+# The Docker build is skipped nowhere - no `continue-on-error` - so a broken
+# image fails the run instead of silently passing.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 3.10 is the documented floor (requires-python / notebook metadata);
+        # 3.12 is the newest interpreter the notebooks and f-strings must accept.
+        python-version: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install via the documented editable install
+        # This exact command is what the README tells users to run, so a broken
+        # build backend fails here rather than in the user's terminal.
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Regression tests
+        run: python -m pytest tests/ -q
+
+      - name: Pre-submission validator (minimal mode - skips Docker and HF Space)
+        run: python validate_submission.py --minimal
+
+  docker:
+    name: Docker build + health smoke test
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t codedebug-env:ci .
+
+      - name: Image ships the tools its docs run inside it
+        # inference.py and validate_submission.py are copied into the image, so
+        # the validator must work there too (it exercises the in-process API).
+        run: docker run --rm codedebug-env:ci python validate_submission.py --minimal
+
+      - name: Start the container
+        run: docker run -d --name codedebug-ci -p 7860:7860 codedebug-env:ci
+
+      - name: Smoke-test the served API
+        # Waits for /api/v1/health, then checks reset / state / step over HTTP.
+        run: python scripts/smoke_test.py --base-url http://127.0.0.1:7860 --timeout 60
+
+      - name: Container HEALTHCHECK reports healthy
+        run: |
+          for attempt in $(seq 1 30); do
+            status=$(docker inspect --format '{{.State.Health.Status}}' codedebug-ci)
+            echo "attempt ${attempt}: ${status}"
+            if [ "${status}" = "healthy" ]; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::container never reported healthy within 150s"
+          docker inspect --format '{{json .State.Health}}' codedebug-ci
+          exit 1
+
+      - name: Container logs
+        if: always()
+        run: docker logs codedebug-ci
+
+      - name: Remove container
+        if: always()
+        run: docker rm -f codedebug-ci
