@@ -1,15 +1,15 @@
 """Contract tests for environment state transitions."""
 from __future__ import annotations
 
-import sys
 import os
+import sys
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 
-from openenv_env.environment import CodeDebugEnvironment
-from openenv_env.models import Action
-from openenv_env.tasks import TASK_REGISTRY
+from openenv_env.environment import CodeDebugEnvironment  # noqa: E402
+from openenv_env.models import Action  # noqa: E402
+from openenv_env.tasks import TASK_REGISTRY  # noqa: E402
 
 
 def test_reset_first_step_zero():
