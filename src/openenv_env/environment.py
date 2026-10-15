@@ -131,6 +131,22 @@ class CodeDebugEnvironment:
         if self._done:
             raise RuntimeError("Episode is done. Call reset() to start a new one.")
 
+        # Support incremental patches as an alternative to full fixes.
+        if getattr(action, "patch", None):
+            try:
+                from .agent_tools import apply_patch as _apply_patch
+                res = _apply_patch(self._task.buggy_code, action.patch)
+                if res.get("applied"):
+                    action = Action(
+                        fixed_code=res["code"],
+                        explanation=action.explanation,
+                        confidence=action.confidence,
+                        metadata=action.metadata,
+                        patch=action.patch,
+                    )
+            except Exception:
+                pass
+
         # Score the action once, keeping the per-grader breakdown
         components = grade_components(action, self._task)
         reward = composite_from_components(components)
