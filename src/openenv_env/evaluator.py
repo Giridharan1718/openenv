@@ -1,9 +1,10 @@
 """evaluator.py — reproducible benchmark harness for CodeDebug."""
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
 import time
-from typing import Any, Callable
+from collections.abc import Callable
+from dataclasses import asdict, dataclass
+from typing import Any
 
 from .environment import CodeDebugEnvironment
 from .models import Action
