@@ -162,6 +162,15 @@ def output_grader(action: Action, task: TaskSpec) -> float:
     if not task.test_inputs:
         return 0.5  # no tests → give partial credit
 
+    # Safety gate: reject unsafe code
+    try:
+        from .safety import is_safe as _is_safe
+        safe, _ = _is_safe(action.fixed_code)
+    except Exception:
+        safe = True
+    if not safe:
+        return 0.0
+
     lang = getattr(task, "language", "python")
     if lang == "javascript":
         return _js_output_grader(action, task)
