@@ -214,4 +214,3 @@ REGISTRY: dict[str, LanguageExecutor] = {
 
 def get_executor(language: str) -> LanguageExecutor:
     return REGISTRY.get(language, REGISTRY["python"])
-PYEOF
