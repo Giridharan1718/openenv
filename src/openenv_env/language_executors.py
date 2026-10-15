@@ -11,10 +11,9 @@ import json
 import os
 import shutil
 import subprocess
-import sys
 import tempfile
 import textwrap
-from typing import Any, Callable
+from typing import Any
 
 DEFAULT_TIMEOUT = 10
 

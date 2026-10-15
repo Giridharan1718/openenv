@@ -13,7 +13,7 @@ def view_file(workspace: str, path: str) -> dict[str, Any]:
     if not full.startswith(os.path.abspath(workspace)):
         return {"error": "path escapes workspace"}
     try:
-        with open(full, "r", encoding="utf-8") as f:
+        with open(full, encoding="utf-8") as f:
             return {"path": path, "content": f.read()}
     except Exception as e:
         return {"error": str(e)}
@@ -52,4 +52,3 @@ def get_task_info(task) -> dict[str, Any]:
         "hints": list(getattr(task, "hints", [])),
         "max_steps": getattr(task, "max_steps", 3),
     }
-PYEOF

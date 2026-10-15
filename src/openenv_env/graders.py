@@ -54,14 +54,13 @@ def _node_exe():
 
 _NODE = _node_exe()
 
-import shlex as _shlex
-
 
 def _run_node(args):
     import subprocess as _sp
     try:
         return _sp.run(args, capture_output=True, text=True, timeout=15)
     except PermissionError:
+        import shlex as _shlex
         # args[0] is node binary; reconstruct without it
         rest = " ".join(_shlex.quote(a) for a in args[1:])
         return _sp.run(["C:/Program Files/Git/bin/bash.exe", "-c", "node " + rest],
@@ -70,7 +69,6 @@ def _run_node(args):
 def _js_output_grader(action: Action, task: TaskSpec) -> float:
     import json as _json
     import os as _os
-    import subprocess as _sp
     import tempfile as _tp
 
     code = textwrap.dedent(action.fixed_code)
@@ -104,8 +102,10 @@ def _js_output_grader(action: Action, task: TaskSpec) -> float:
                     [_NODE, sfile, _json.dumps(list(args))],
                 )
             finally:
-                try: _os.unlink(sfile)
-                except OSError: pass
+                try:
+                    _os.unlink(sfile)
+                except OSError:
+                    pass
             if run.returncode != 0:
                 continue
             try:
@@ -116,8 +116,10 @@ def _js_output_grader(action: Action, task: TaskSpec) -> float:
                 passed += 1
         return round(passed / total, 4)
     finally:
-        try: _os.unlink(modpath)
-        except OSError: pass
+        try:
+            _os.unlink(modpath)
+        except OSError:
+            pass
 
 
 # ---------------------------------------------------------------------------
@@ -133,15 +135,19 @@ def syntax_grader(action: Action, task: TaskSpec) -> float:
     try:
         if getattr(task, "language", "python") == "javascript":
             # use node --check
-            import os as _os, subprocess as _sp, tempfile as _tp
+            import os as _os
+            import tempfile as _tp
             with _tp.NamedTemporaryFile("w", suffix=".mjs", delete=False) as f:
-                f.write(textwrap.dedent(action.fixed_code)); p=f.name
+                f.write(textwrap.dedent(action.fixed_code))
+                p = f.name
             try:
                 r = _run_node([_NODE, "--check", p])
                 return 1.0 if r.returncode == 0 else 0.0
             finally:
-                try: _os.unlink(p)
-                except OSError: pass
+                try:
+                    _os.unlink(p)
+                except OSError:
+                    pass
         ast.parse(textwrap.dedent(action.fixed_code))
         return 1.0
     except SyntaxError:
