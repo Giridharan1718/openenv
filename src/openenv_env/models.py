@@ -74,6 +74,9 @@ class Action(BaseModel):
     """What the agent submits to the environment each step."""
 
     fixed_code: str = Field(..., description="The agent's proposed corrected Python code.")
+    patch: str | None = Field(
+        None, description="Optional unified diff applied to buggy_code instead of full replacement."
+    )
     explanation: str = Field(
         "", description="Natural-language explanation of the changes made."
     )

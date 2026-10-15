@@ -1,0 +1,46 @@
+[
+  {
+    "task_id": "task_gen_000",
+    "language": "python",
+    "description": "Generated: fix an off-by-one in a sum function.",
+    "entry_point": "total",
+    "buggy_code": "def total(nums):\n    s = 0\n    for i in range(len(nums) - 1):  # BUG\n        s += nums[i]\n    return s\n",
+    "fixed_code": "def total(nums):\n    s = 0\n    for i in range(len(nums)):\n        s += nums[i]\n    return s\n",
+    "error_type": "logic",
+    "difficulty": "easy",
+    "test_inputs": [
+      {
+        "args": [
+          [
+            1,
+            2,
+            3
+          ]
+        ],
+        "expected": 6
+      }
+    ]
+  },
+  {
+    "task_id": "task_gen_001",
+    "language": "python",
+    "description": "Generated: fix an off-by-one in a sum function.",
+    "entry_point": "total",
+    "buggy_code": "def total(nums):\n    s = 0\n    for i in range(len(nums) - 1):  # BUG\n        s += nums[i]\n    return s\n",
+    "fixed_code": "def total(nums):\n    s = 0\n    for i in range(len(nums)):\n        s += nums[i]\n    return s\n",
+    "error_type": "logic",
+    "difficulty": "easy",
+    "test_inputs": [
+      {
+        "args": [
+          [
+            1,
+            2,
+            3
+          ]
+        ],
+        "expected": 6
+      }
+    ]
+  }
+]

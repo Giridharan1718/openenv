@@ -364,8 +364,8 @@ TASK_REGISTRY: dict[str, TaskSpec] = {
         TASK_RUNTIME_001,
         TASK_RUNTIME_002,
         TASK_RUNTIME_003,
-        TASK_JS_SYNTAX_001,
-        TASK_JS_LOGIC_001,
+        # TASK_JS_SYNTAX_001,  # requires node runtime (disabled in this env)
+        # TASK_JS_LOGIC_001,
     ]
 }
 
@@ -378,6 +378,4 @@ DEFAULT_TASK_ORDER: list[str] = [
     "task_logic_002",
     "task_runtime_002",
     "task_runtime_003",
-    "task_js_syntax_001",
-    "task_js_logic_001",
 ]
